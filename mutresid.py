@@ -2,7 +2,7 @@ import MDAnalysis as mda
 import numpy as np
 from collections import OrderedDict
 
-#TEST
+
 
 def parse_ter_lines(pdb_file):
     """
@@ -19,7 +19,10 @@ def parse_ter_lines(pdb_file):
 
 def load_amberpdb(pdb_file):
     """
-    Load atoms from the provided PDB file into an MDAnalysis universe and parse TER lines.
+    Load atoms from the provided PDB file into an MDAnalysis universe.
+    
+    MDAnalysis does not read TER lines, and AMBER requires them to define each molecule. 
+    Therefore we need to set them by hand.
 
     Parameters:
         pdb_file (str): The path to the PDB file to load.
@@ -55,7 +58,6 @@ def select_molecules(ter_lines, universe):
 
     return molecules
 
-
 def format_amberSelection(selection):
     """
     Format the atoms in the given selection into AMBER format.
@@ -70,7 +72,9 @@ def format_amberSelection(selection):
 
 def format_amberpdb(molecules):
     """
-    Format the atoms in the given molecules into AMBER format.
+    Format the atoms in the given PDB into AMBER format.
+    We use the information about the TER lines parsed from the original PDB to define the 
+    location of the new TER lines that define the end of a molecule.
 
     Parameters:
         molecules (OrderedDict): Ordered dictionary where keys indicate the TER line at the end 
@@ -100,6 +104,9 @@ def write_amberpdb(filename, pdb_lines):
 def remove_sidechain(u, residue_index):
     """
     Remove sidechain atoms from a specific residue in the MDAnalysis universe.
+
+    tleap can add missing atoms from a residue but will return an error if unrelated
+    atoms are present so we leave only the sidechain.
 
     Parameters:
         u (MDAnalysis.core.universe.Universe): The MDAnalysis universe object.
