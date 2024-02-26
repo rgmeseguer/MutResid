@@ -2,6 +2,8 @@ import MDAnalysis as mda
 import numpy as np
 from collections import OrderedDict
 
+#TEST
+
 def parse_ter_lines(pdb_file):
     """
     Parse 'TER' lines from a PDB file.
