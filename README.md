@@ -1,5 +1,5 @@
 # MutResid
-A python script that uses MDanalysis and pytraj to take a protein structure in PDB (or amber format :not yet:) and mutates one residue returning a PDB (and the amber required files :not yet:).
+A python script that uses MDanalysis and to take a protein structure in PDB and mutates one residue returning a PDB that can be run in tleap to generate the amber required files.
 
 ## Example:
 ```python
