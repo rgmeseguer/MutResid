@@ -1,7 +1,6 @@
 import MDAnalysis as mda
 import numpy as np
-import pytraj as pt
-import os
+from checkFiles import check_pdb_file, check_param_files
 from collections import OrderedDict
 
 def parse_ter_lines(pdb_file):
@@ -126,74 +125,6 @@ def remove_sidechain(u, residue_index):
 
     return u
 
-def check_pdb_file(pdb_file):
-    """
-    Check if a PDB file exists and return its absolute path, base name, and directory path.
-
-    Parameters:
-    pdb_file (str): Path to the PDB file.
-
-    Returns:
-    tuple: A tuple containing the absolute path, base name (without extension), and the directory path of the PDB file.
-
-    Raises:
-    Exception: If the PDB file does not exist.
-    """
-    # Check if the pdb_file exists
-    if os.path.exists(pdb_file):
-        # If the file exists, get its absolute path, base name (file name without extension), and the directory path
-        pdb_path = os.path.abspath(pdb_file)
-        pdb_name = os.path.basename(pdb_file).rsplit('.', maxsplit=1)[0]
-        pdb_dir = os.path.dirname(pdb_file)
-    else:
-        # If the file does not exist, raise an exception
-        raise Exception(f"No {pdb_file} found in {os.getcwd()}")
-
-    # Return the absolute path, base name, and the directory path
-    return pdb_path, pdb_name, pdb_dir
-
-
-def check_param_files(mol_file):
-    """
-    Check for the existence of molecular files and their corresponding frcmod files.
-
-    Parameters:
-    mol_file (str): Path to the molecular file (.mol2).
-
-    Returns:
-    tuple: A tuple containing the absolute path of the molecular file,
-           the absolute path of the corresponding frcmod file,
-           the base name of the molecular file (without extension),
-           and the directory path of the molecular file.
-
-    Raises:
-    Exception: If the molecular file does not exist, if it does not have a .mol2 extension,
-               or if the corresponding frcmod file does not exist in the same directory.
-    """
-    if os.path.exists(mol_file):
-        mol_path = os.path.abspath(mol_file)
-        param_file = os.path.basename(mol_file)
-        param_name, extension = os.path.splitext(param_file)
-        param_dir = os.path.dirname(mol_file)
-        
-        if extension != ".mol2":
-            raise Exception("The molecular file must have a .mol2 extension.")
-
-        frcmod_file = os.path.join(param_dir, f"{param_name}.frcmod")
-
-        # Check if the frcmod file exists
-        if os.path.exists(frcmod_file):
-            # Get the absolute path of the frcmod file
-            frcmod_path = os.path.abspath(frcmod_file)
-        else:
-            raise Exception(f"No {frcmod_file} found in {os.getcwd()}, \
-                             mol2 and frcmod files have to be on the same path")
-    else:
-        raise Exception(f"No {mol_file} found in {os.getcwd()}")
-
-    # Return the absolute paths, base name, and directory path
-    return mol_path, frcmod_path, param_name, param_dir
-
 def mutate_residue(pdb_file, residue_id, new_residue_name):
     """
     Mutate a specific residue in a PDB file to a new residue type.
@@ -231,71 +162,4 @@ def mutate_residue(pdb_file, residue_id, new_residue_name):
 
     return output_file
 
-def create_tleap_script(pdb,extra_param,extra_name,addSolvent,saveScript=False):
-    """
-    Generate a tleap script for creating Amber files from PDB and additional parameters.
-
-    Parameters:
-        pdb (str): The path to the input PDB file.
-        extra_param (str): The path to additional parameters file.
-        extra_name (str): Name of the additional parameter.
-        addSolvent (bool): Flag to indicate if solvent needs to be added.
-        saveScript (bool): Flag to save the tleap script.
-
-    Returns:
-        tuple: Directory path, PDB name, and tleap script.
-    """
-    tleap_header = f"source leaprc.protein.ff14SB\nsource leaprc.water.tip3p\n"
-    tleap_solvent = ""
-    tleap_xparam = ""
-
-    if pdb == None:
-         raise Exception("If you do not define the tleap script you need to provide the pdb file")
-    pdb_path, pdb_name, pdb_dir = check_pdb_file(pdb)
-    tleap_pdb = f"mol = loadpdb {pdb_path}\n"
-    
-    if addSolvent:
-        tleap_solvent = f"solvatebox mol TIP3PBOX 12\naddions mol Cl- 0\naddions mol Na+ 0\n" 
-
-    if extra_param!=None:
-        if extra_name==None:
-            raise Exception(f"you have to define the name of the sustrate")
-        mol_path, frcmod_path, param_name, param_dir = check_param_files(extra_param)
-        tleap_xparam = f"{extra_name} = loadmol2 {param_dir}/{param_name}.mol2\nsaveoff {extra_name} {param_dir}/{param_name}.lib\nloadamberparams {param_dir}/{param_name}.frcmod\ncheck {extra_name}\n"
-    
-    tleap_footer = f"saveamberparm mol {pdb_dir}/{pdb_name}.prmtop {pdb_dir}/{pdb_name}.inpcrd\nsavepdb mol {pdb_dir}/{pdb_name}_amber.pdb\nquit"
-    
-    # Combine all parts to generate tleap script
-    tleap_script=tleap_header+tleap_xparam+tleap_pdb+tleap_solvent+tleap_footer
-    
-    # Write tleap script to file if requested
-    if saveScript:
-        with open(f"{pdb_dir}/tleap.inp","w") as savefile:
-                savefile.write(tleap_script)
-
-    return pdb_dir,pdb_name,tleap_script
-
-def generate_amber_files(verbose=False,tleap_script=None,pdb=None,extra_param=None,extra_name=None,addSolvent=False):
-    """
-    Generate Amber files from input PDB and additional parameters.
-
-    Parameters:
-        verbose (bool): Flag to enable verbose output.
-        tleap_script (str): String of a tleap script. If defined the remaining parameters are ignored.
-        
-        if telap_script is not defined pdb is required and the rest of variables are optional.
-            pdb (str): Path to the input PDB file.
-            extra_param (str): Path to additional parameters file.
-            extra_name (str): Name of the additional parameter.
-            addSolvent (bool): Flag to indicate if solvent needs to be added.
-    
-    Returns:
-        None
-    """
-    # If tleap script is not provided, create one
-    if tleap_script==None:
-            pdb_dir,pdb_name,tleap_script=create_tleap_script(pdb,extra_param,extra_name,addSolvent)
-    
-    # Load the tleap script using pytraj
-    pt.load_leap(tleap_script,verbose=verbose )
-    print(f"Saved files: Amber topology({pdb_dir}/{pdb_name}.prmtop) coordinates ({pdb_dir}/{pdb_name}.inpcrd) and pdb ({pdb_dir}/{pdb_name}_amber.pdb)")
+   
