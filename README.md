@@ -1,5 +1,5 @@
 # MutResid
-A python script that uses MDanalysis and to take a protein structure in PDB and mutates one residue returning a PDB and then runs it trough tleap to return the required Amber files.
+A python module that uses MDanalysis and to take a protein structure in PDB and mutates one residue returning a PDB and then runs it trough tleap to return the required Amber files.
 
 ## Dependecies:
 - numpy
