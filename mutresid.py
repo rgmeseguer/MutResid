@@ -32,7 +32,7 @@ def load_amberpdb(pdb_file):
                - List of TER lines from the PDB file.
     """
     ter_lines = parse_ter_lines(pdb_file)
-    universe = mda.Universe(pdb_file)
+    universe = mda.Universe(pdb_file,format='pdb')
     print(f"Loaded {pdb_file}.")
     return universe, ter_lines
 
