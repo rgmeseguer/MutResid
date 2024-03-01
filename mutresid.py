@@ -1,6 +1,6 @@
 import MDAnalysis as mda
 import numpy as np
-#from checkFiles import check_pdb_file, check_param_files
+from .checkFiles import check_pdb_file
 from collections import OrderedDict
 
 def parse_ter_lines(pdb_file):
@@ -33,6 +33,7 @@ def load_amberpdb(pdb_file):
     """
     ter_lines = parse_ter_lines(pdb_file)
     universe = mda.Universe(pdb_file)
+    print(f"Loaded {pdb_file}.")
     return universe, ter_lines
 
 def select_molecules(ter_lines, universe):
@@ -123,6 +124,7 @@ def remove_sidechain(u, residue_index):
     # Remove sidechain atoms
     u.atoms = u.atoms[mask]
 
+    print(f"Removed sidechain of residue {residue_index}.")
     return u
 
 def mutate_residue(pdb_file, residue_id, new_residue_name):
