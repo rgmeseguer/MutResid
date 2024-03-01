@@ -1,6 +1,6 @@
 import MDAnalysis as mda
 import numpy as np
-from checkFiles import check_pdb_file, check_param_files
+#from checkFiles import check_pdb_file, check_param_files
 from collections import OrderedDict
 
 def parse_ter_lines(pdb_file):

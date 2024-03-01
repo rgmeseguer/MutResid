@@ -1,5 +1,5 @@
 import pytraj as pt
-from checkFiles import check_pdb_file, check_param_files
+#from checkFiles import check_pdb_file, check_param_files
 
 def create_tleap_script(pdb,extra_param,extra_name,addSolvent,saveScript=False):
     """
