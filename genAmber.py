@@ -1,7 +1,7 @@
 import pytraj as pt
-from .checkFiles import check_pdb_file, check_param_files
+from checkFiles import check_pdb_file, check_param_files
 
-def create_tleap_script(pdb,extra_param,extra_name,addSolvent,saveScript=False):
+def create_tleap_script(pdb,extra_param,extra_name,addSolvent,saveScript=True):
     """
     Generate a tleap script for creating Amber files from PDB and additional parameters.
 
@@ -22,7 +22,7 @@ def create_tleap_script(pdb,extra_param,extra_name,addSolvent,saveScript=False):
     if pdb == None:
          raise Exception("If you do not define the tleap script you need to provide the pdb file")
     pdb_path, pdb_name, pdb_dir = check_pdb_file(pdb)
-    tleap_pdb = f"mol = loadpdb {pdb_path}\n"
+    tleap_pdb = f'mol = loadpdb "{pdb_path}"\n'
     
     if addSolvent:
         tleap_solvent = f"solvatebox mol TIP3PBOX 12\naddions mol Cl- 0\naddions mol Na+ 0\n" 
@@ -31,9 +31,9 @@ def create_tleap_script(pdb,extra_param,extra_name,addSolvent,saveScript=False):
         if extra_name==None:
             raise Exception(f"you have to define the name of the sustrate")
         mol_path, frcmod_path, param_name, param_dir = check_param_files(extra_param)
-        tleap_xparam = f"{extra_name} = loadmol2 {param_dir}/{param_name}.mol2\nsaveoff {extra_name} {param_dir}/{param_name}.lib\nloadamberparams {param_dir}/{param_name}.frcmod\ncheck {extra_name}\n"
+        tleap_xparam = f'{extra_name} = loadmol2 "{param_dir}/{param_name}.mol2"\nsaveoff {extra_name} "{param_dir}/{param_name}.lib"\nloadamberparams "{param_dir}/{param_name}.frcmod"\ncheck {extra_name}\n'
     
-    tleap_footer = f"saveamberparm mol {pdb_dir}/{pdb_name}.prmtop {pdb_dir}/{pdb_name}.inpcrd\nsavepdb mol {pdb_dir}/{pdb_name}_amber.pdb\nquit"
+    tleap_footer = f'saveamberparm mol {pdb_dir}/{pdb_name}.prmtop {pdb_dir}/{pdb_name}.inpcrd \nsavepdb mol "{pdb_dir}/{pdb_name}_amber.pdb"'
     
     # Combine all parts to generate tleap script
     tleap_script=tleap_header+tleap_xparam+tleap_pdb+tleap_solvent+tleap_footer
@@ -68,4 +68,5 @@ def generate_amber_files(verbose=False,tleap_script=None,pdb=None,extra_param=No
     
     # Load the tleap script using pytraj
     pt.load_leap(tleap_script,verbose=verbose )
-    print(f"Saved files: Amber topology({pdb_dir}/{pdb_name}.prmtop) coordinates ({pdb_dir}/{pdb_name}.inpcrd) and pdb ({pdb_dir}/{pdb_name}_amber.pdb)")
+    
+    print(f"Saved files: \n   Amber topology:{pdb_dir}/{pdb_name}.prmtop) \n   Coordinates: {pdb_dir}/{pdb_name}.inpcrd \n   PDB: {pdb_dir}/{pdb_name}_amber.pdb")

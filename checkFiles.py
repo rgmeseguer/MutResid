@@ -18,7 +18,7 @@ def check_pdb_file(pdb_file):
         # If the file exists, get its absolute path, base name (file name without extension), and the directory path
         pdb_path = os.path.abspath(pdb_file)
         pdb_name = os.path.basename(pdb_file).rsplit('.', maxsplit=1)[0]
-        pdb_dir = os.path.dirname(pdb_file)
+        pdb_dir = os.path.dirname(os.path.abspath(pdb_file))
     else:
         # If the file does not exist, raise an exception
         raise Exception(f"No {pdb_file} found in {os.getcwd()}")
@@ -47,7 +47,7 @@ def check_param_files(mol_file):
         mol_path = os.path.abspath(mol_file)
         param_file = os.path.basename(mol_file)
         param_name, extension = os.path.splitext(param_file)
-        param_dir = os.path.dirname(mol_file)
+        param_dir = os.path.dirname(os.path.abspath(mol_file))
         
         if extension != ".mol2":
             raise Exception("The molecular file must have a .mol2 extension.")

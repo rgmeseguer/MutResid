@@ -1,6 +1,6 @@
 import MDAnalysis as mda
 import numpy as np
-from .checkFiles import check_pdb_file
+from checkFiles import check_pdb_file
 from collections import OrderedDict
 
 def parse_ter_lines(pdb_file):
@@ -18,10 +18,12 @@ def parse_ter_lines(pdb_file):
 
 def load_amberpdb(pdb_file):
     """
-    Load atoms from the provided PDB file into an MDAnalysis universe.
+    Load atoms from the provided PDB file into an MDAnalysis universe
     
     MDAnalysis does not read TER lines, and AMBER requires them to define each molecule. 
     Therefore we need to set them by hand.
+
+    Also will remove every WAT residue.
 
     Parameters:
         pdb_file (str): The path to the PDB file to load.
@@ -33,6 +35,7 @@ def load_amberpdb(pdb_file):
     """
     ter_lines = parse_ter_lines(pdb_file)
     universe = mda.Universe(pdb_file,format='pdb')
+    universe = universe.select_atoms("not resname WAT").universe
     print(f"Loaded {pdb_file}.")
     return universe, ter_lines
 
