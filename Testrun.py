@@ -1,4 +1,4 @@
-from mutresid import mutate_residue
+from mutres import mutate_residue
 from genAmber import generate_amber_files
 
 pdb_mutated = mutate_residue("Test/str.pdb", residue_id=2, new_residue_name="HIS")

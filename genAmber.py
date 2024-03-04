@@ -1,7 +1,7 @@
 import pytraj as pt
 from checkFiles import check_pdb_file, check_param_files
 
-def create_tleap_script(pdb,extra_param,extra_name,addSolvent,saveScript=True):
+def create_tleap_script(pdb,extra_param,extra_name,addSolvent,saveScript=False):
     """
     Generate a tleap script for creating Amber files from PDB and additional parameters.
 

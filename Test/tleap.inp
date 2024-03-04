@@ -1,9 +1,0 @@
-source leaprc.protein.ff14SB
-source leaprc.water.tip3p
-PET = loadmol2 "/home/garmera/OneDrive/Dev/MutResid/Test/sustrate.mol2"
-saveoff PET "/home/garmera/OneDrive/Dev/MutResid/Test/sustrate.lib"
-loadamberparams "/home/garmera/OneDrive/Dev/MutResid/Test/sustrate.frcmod"
-check PET
-mol = loadpdb "/home/garmera/OneDrive/Dev/MutResid/Test/mutated_str.pdb"
-saveamberparm mol /home/garmera/OneDrive/Dev/MutResid/Test/mutated_str.prmtop /home/garmera/OneDrive/Dev/MutResid/Test/mutated_str.inpcrd 
-savepdb mol "/home/garmera/OneDrive/Dev/MutResid/Test/mutated_str_amber.pdb"
