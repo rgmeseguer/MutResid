@@ -76,7 +76,6 @@ def generate_amber_files(verbose=False,tleap_script=None,pdb=None,extra_param=No
     
     inpcrd_file = f"{pdb_dir}/{pdb_name}.inpcrd"
     top_file    = f"{pdb_dir}/{pdb_name}.prmtop"
-    print(inpcrd_file,top_file)
     if output:
         print(f"Saved files: \n   Amber topology:{pdb_dir}/{pdb_name}.prmtop \n   Coordinates: {pdb_dir}/{pdb_name}.inpcrd")
     
