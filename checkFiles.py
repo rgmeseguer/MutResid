@@ -67,3 +67,17 @@ def check_param_files(mol_file):
     # Return the absolute paths, base name, and directory path
     return mol_path, frcmod_path, param_name, param_dir
 
+def check_topncrd(top_file,traj_file):
+    if os.path.exists(top_file):
+        top_path = os.path.abspath(top_file)
+        top_dir = os.path.dirname(os.path.abspath(top_file))
+    else:
+        raise Exception(f"No {top_file} found in {os.getcwd()}")
+        
+    if os.path.exists(os.path.exists(traj_file)):
+        traj_path = os.path.abspath(traj_file)
+        traj_dir = os.path.dirname(os.path.abspath(traj_file))
+    else:
+        raise Exception(f"No {traj_file} found in {os.getcwd()}")
+                      
+    return top_path, top_dir, traj_path, traj_dir
