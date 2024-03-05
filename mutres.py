@@ -131,7 +131,7 @@ def remove_sidechain(u, residue_index,output=False):
     if output: print(f"Removed sidechain of residue {residue_index}.")
     return u
 
-def mutate_residue(pdb_file, residue_id, new_residue_name,output=False):
+def mutate_residue(pdb_file, residue_id, new_residue_name,output_File=None,output=False):
     """
     Mutate a specific residue in a PDB file to a new residue type.
 
@@ -161,7 +161,8 @@ def mutate_residue(pdb_file, residue_id, new_residue_name,output=False):
     molecules = select_molecules(terminal_resid, universe)
     
     # Write the modified structure to a new PDB file
-    output_file = f"{pdb_dir}/mutated_{pdb_name}.pdb"
+    if output_File == None:
+        output_file = f"{pdb_dir}/mutated_{pdb_name}.pdb"
     write_amberpdb(output_file, format_amberpdb(molecules))
     
     if output: print(f"Structure with residue {residue_id} mutated to {new_residue_name} and sidechain atoms deleted written to {output_file}")
