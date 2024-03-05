@@ -1,7 +1,8 @@
 import MDAnalysis as mda
 import numpy as np
 from collections import OrderedDict
-from checkFiles import check_pdb_file
+
+from MutResid.checkFiles import check_pdb_file
 
 def parse_ter_lines(pdb_file):
     """
@@ -16,7 +17,7 @@ def parse_ter_lines(pdb_file):
     with open(pdb_file, 'r') as f:
         return [line for line in f if line.startswith('TER')]
 
-def load_amberpdb(pdb_file):
+def load_amberpdb(pdb_file,output=False):
     """
     Load atoms from the provided PDB file into an MDAnalysis universe
     
@@ -36,7 +37,7 @@ def load_amberpdb(pdb_file):
     ter_lines = parse_ter_lines(pdb_file)
     universe = mda.Universe(pdb_file,format='pdb')
     universe = universe.select_atoms("not resname WAT").universe
-    print(f"Loaded {pdb_file}.")
+    if output: print(f"Loaded {pdb_file}.")
     return universe, ter_lines
 
 def select_molecules(ter_lines, universe):
@@ -104,7 +105,7 @@ def write_amberpdb(filename, pdb_lines):
     with open(filename, 'w') as s:
         s.writelines(pdb_lines)
 
-def remove_sidechain(u, residue_index):
+def remove_sidechain(u, residue_index,output=False):
     """
     Remove sidechain atoms from a specific residue in the MDAnalysis universe.
 
@@ -127,10 +128,10 @@ def remove_sidechain(u, residue_index):
     # Remove sidechain atoms
     u.atoms = u.atoms[mask]
 
-    print(f"Removed sidechain of residue {residue_index}.")
+    if output: print(f"Removed sidechain of residue {residue_index}.")
     return u
 
-def mutate_residue(pdb_file, residue_id, new_residue_name):
+def mutate_residue(pdb_file, residue_id, new_residue_name,output=False):
     """
     Mutate a specific residue in a PDB file to a new residue type.
 
@@ -163,7 +164,7 @@ def mutate_residue(pdb_file, residue_id, new_residue_name):
     output_file = f"{pdb_dir}/mutated_{pdb_name}.pdb"
     write_amberpdb(output_file, format_amberpdb(molecules))
     
-    print(f"Structure with residue {residue_id} mutated to {new_residue_name} and sidechain atoms deleted written to {output_file}")
+    if output: print(f"Structure with residue {residue_id} mutated to {new_residue_name} and sidechain atoms deleted written to {output_file}")
 
     return output_file
 
