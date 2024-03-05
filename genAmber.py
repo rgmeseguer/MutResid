@@ -73,12 +73,14 @@ def generate_amber_files(verbose=False,tleap_script=None,pdb=None,extra_param=No
     
     # Load the tleap script using pytraj
     pt.load_leap(tleap_script,verbose=verbose )
+    
     inpcrd_file = f"{pdb_dir}/{pdb_name}.inpcrd"
     top_file    = f"{pdb_dir}/{pdb_name}.prmtop"
+    print(inpcrd_file,top_file)
     if output:
         print(f"Saved files: \n   Amber topology:{pdb_dir}/{pdb_name}.prmtop \n   Coordinates: {pdb_dir}/{pdb_name}.inpcrd")
     
         if savePDB:
             print(f"   PDB: {pdb_dir}/{pdb_name}_amber.pdb")
 
-    return inpcrd_file,top_file
+    return inpcrd_file, top_file
