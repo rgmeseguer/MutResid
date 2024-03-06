@@ -60,12 +60,14 @@ def check_param_files(mol_file):
             frcmod_path = os.path.abspath(frcmod_file)
         else:
             raise Exception(f"No {frcmod_file} found in {os.getcwd()}, \
-                             mol2 and frcmod files have to be on the same path")
+                             mol2 and frcmod files have to be on the same path and have the same name")
     else:
         raise Exception(f"No {mol_file} found in {os.getcwd()}")
 
+    with open(mol_path,"r") as mol:
+        resname = mol.readlines()[1]
     # Return the absolute paths, base name, and directory path
-    return mol_path, frcmod_path, param_name, param_dir
+    return mol_path, frcmod_path, param_dir, resname
 
 def check_topncrd(top_file,traj_file):
     if os.path.exists(top_file):
@@ -81,3 +83,24 @@ def check_topncrd(top_file,traj_file):
         raise Exception(f"No {traj_file} found in {os.getcwd()}")
                       
     return top_path, top_dir, traj_path, traj_dir
+
+class AmberFiles():
+    def __init__(self,topfile=None,crdfile=None,pdbfile=None,sus_file=None):
+        self.parm = None
+        self.crd  = None
+        self.pdb  = None
+        self.sus_mol = None
+        
+        if topfile!=None or crdfile!=None:
+            if crdfile == None: 
+                raise Exception("If Topology is defined you have to define the coordinates too.") 
+            if topfile == None:
+                raise Exception("If amber coordinates are defined you have to define the topology too.") 
+            
+            self.parm, self.parm_dir, self.crd, self.crd_dir = check_topncrd(topfile,crdfile)
+            
+        if pdbfile!=None:
+            self.pdb, self.pdb_name, self.pdb_dir = check_pdb_file(pdbfile)
+        
+        if sus_file!=None:
+            self.sus_mol, self.sus_frcmod, self.sus_dir, self.sus_name = check_param_files(sus_file)

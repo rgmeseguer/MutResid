@@ -1,7 +1,7 @@
 import pytraj as pt
-from MutResid.checkFiles import check_pdb_file, check_param_files
+from MutResid.checkFiles import check_pdb_file, check_param_files, AmberFiles
 
-def create_tleap_script(pdb,extra_param,extra_name,addSolvent,savePDB,saveScript=False):
+def create_tleap_script(amberfile,addSolvent,savePDB,saveScript=False):
     """
     Generate a tleap script for creating Amber files from PDB and additional parameters.
 
@@ -21,36 +21,36 @@ def create_tleap_script(pdb,extra_param,extra_name,addSolvent,savePDB,saveScript
     tleap_pdb = ""
     tleap_save_pdb = ""
 
-    if pdb == None:
+    if amberfile.pdb == None:
          raise Exception("If you do not define the tleap script you need to provide the pdb file")
-    pdb_path, pdb_name, pdb_dir = check_pdb_file(pdb)
-    tleap_pdb = f'mol = loadpdb "{pdb_path}"\n'
+    tleap_pdb = f'mol = loadpdb "{amberfile.pdb}"\n'
     
     if addSolvent:
         tleap_solvent = f"solvatebox mol TIP3PBOX 12\naddions mol Cl- 0\naddions mol Na+ 0\n" 
 
-    if extra_param!=None:
-        if extra_name==None:
-            raise Exception(f"you have to define the name of the sustrate")
-        mol_path, frcmod_path, param_name, param_dir = check_param_files(extra_param)
-        tleap_xparam = f'{extra_name} = loadmol2 {param_dir}/{param_name}.mol2 \nsaveoff {extra_name} {param_dir}/{param_name}.lib \nloadamberparams  {param_dir}/{param_name}.frcmod \ncheck {extra_name}\n'
+    if amberfile.sus_mol != None:
+        # if extra_name==None:
+        #     raise Exception(f"you have to define the name of the sustrate")
+        #mol_path, frcmod_path, extra_name= check_param_files(extra_param)
+        #tleap_xparam = f'{extra_name} = loadmol2 {param_dir}/{param_name}.mol2 \nsaveoff {extra_name} {param_dir}/{param_name}.lib \nloadamberparams  {param_dir}/{param_name}.frcmod \ncheck {extra_name}\n'
+        tleap_xparam = f'{amberfile.sus_name} = loadmol2 {amberfile.sus_mol} \nloadamberparams  {amberfile.sus_frcmod} \ncheck {amberfile.sus_name}\n'
         
     if savePDB:
-        tleap_save_pdb = "savepdb mol {pdb_dir}/{pdb_name}_amber.pdb"
+        tleap_save_pdb = f"savepdb mol {amberfile.dir_pdb}/{amberfile.pdb_name}_amber.pdb"
     
-    tleap_footer = f'saveamberparm mol {pdb_dir}/{pdb_name}.prmtop {pdb_dir}/{pdb_name}.inpcrd \nquit'
+    tleap_footer = f'saveamberparm mol {amberfile.dir_pdb}/{amberfile.pdb_name}.prmtop {amberfile.dir_pdb}/{amberfile.pdb_name}.inpcrd \nquit'
     
     # Combine all parts to generate tleap script
     tleap_script=tleap_header+tleap_xparam+tleap_pdb+tleap_solvent+tleap_save_pdb+tleap_footer
     
     # Write tleap script to file if requested
     if saveScript:
-        with open(f"{pdb_dir}/tleap.inp","w") as savefile:
+        with open(f"{amberfile.dir_pdb}/tleap.inp","w") as savefile:
                 savefile.write(tleap_script)
 
-    return pdb_dir,pdb_name,tleap_script
+    return tleap_script
 
-def generate_amber_files(verbose=False,tleap_script=None,pdb=None,extra_param=None,extra_name=None,addSolvent=False,savePDB=False,output=False):
+def generate_amber_files(verbose=False,tleap_script=None,amberfile=None,addSolvent=False,savePDB=False,output=False):
     """
     Generate Amber files from input PDB and additional parameters.
 
@@ -69,17 +69,21 @@ def generate_amber_files(verbose=False,tleap_script=None,pdb=None,extra_param=No
     """
     # If tleap script is not provided, create one
     if tleap_script==None:
-            pdb_dir,pdb_name,tleap_script=create_tleap_script(pdb,extra_param,extra_name,addSolvent,savePDB)
+            tleap_script=create_tleap_script(amberfile,addSolvent,savePDB)
     
     # Load the tleap script using pytraj
     pt.load_leap(tleap_script,verbose=verbose )
     
-    inpcrd_file = f"{pdb_dir}/{pdb_name}.inpcrd"
-    top_file    = f"{pdb_dir}/{pdb_name}.prmtop"
-    if output:
-        print(f"Saved files: \n   Amber topology:{pdb_dir}/{pdb_name}.prmtop \n   Coordinates: {pdb_dir}/{pdb_name}.inpcrd")
-    
-        if savePDB:
-            print(f"   PDB: {pdb_dir}/{pdb_name}_amber.pdb")
+    inpcrd_file = f"{amberfile.dir_pdb}/{amberfile.pdb_name}.inpcrd"
+    top_file    = f"{amberfile.dir_pdb}/{amberfile.pdb_name}.prmtop"
+    if savePDB:
+        new_amberfile = AmberFiles(topfile=top_file,crdfile=inpcrd_file,pdbfile=f"{amberfile.dir_pdb}/{amberfile.pdb_name}_amber.pdb",sus_file=amberfile.sus_mol)
+    else:
+        new_amberfile = AmberFiles(topfile=top_file,crdfile=inpcrd_file)
 
-    return inpcrd_file, top_file
+    if output:
+        print(f"Saved files: \n   Amber topology:{top_file} \n   Coordinates: {inpcrd_file}")
+        if savePDB:
+            print(f"   PDB: {amberfile.dir_pdb}/{amberfile.pdb_name}_amber.pdb")
+
+    return new_amberfile
