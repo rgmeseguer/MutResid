@@ -36,16 +36,16 @@ def create_tleap_script(amberfile,addSolvent,savePDB,saveScript=False):
         tleap_xparam = f'{amberfile.sus_name} = loadmol2 {amberfile.sus_mol} \nloadamberparams  {amberfile.sus_frcmod} \ncheck {amberfile.sus_name}\n'
         
     if savePDB:
-        tleap_save_pdb = f"savepdb mol {amberfile.dir_pdb}/{amberfile.pdb_name}_amber.pdb"
+        tleap_save_pdb = f"savepdb mol {amberfile.pdb_dir}/{amberfile.pdb_name}_amber.pdb"
     
-    tleap_footer = f'saveamberparm mol {amberfile.dir_pdb}/{amberfile.pdb_name}.prmtop {amberfile.dir_pdb}/{amberfile.pdb_name}.inpcrd \nquit'
+    tleap_footer = f'saveamberparm mol {amberfile.pdb_dir}/{amberfile.pdb_name}.prmtop {amberfile.pdb_dir}/{amberfile.pdb_name}.inpcrd \nquit'
     
     # Combine all parts to generate tleap script
     tleap_script=tleap_header+tleap_xparam+tleap_pdb+tleap_solvent+tleap_save_pdb+tleap_footer
     
     # Write tleap script to file if requested
     if saveScript:
-        with open(f"{amberfile.dir_pdb}/tleap.inp","w") as savefile:
+        with open(f"{amberfile.pdb_dir}/tleap.inp","w") as savefile:
                 savefile.write(tleap_script)
 
     return tleap_script
@@ -74,16 +74,16 @@ def generate_amber_files(verbose=False,tleap_script=None,amberfile=None,addSolve
     # Load the tleap script using pytraj
     pt.load_leap(tleap_script,verbose=verbose )
     
-    inpcrd_file = f"{amberfile.dir_pdb}/{amberfile.pdb_name}.inpcrd"
-    top_file    = f"{amberfile.dir_pdb}/{amberfile.pdb_name}.prmtop"
+    inpcrd_file = f"{amberfile.pdb_dir}/{amberfile.pdb_name}.inpcrd"
+    top_file    = f"{amberfile.pdb_dir}/{amberfile.pdb_name}.prmtop"
     if savePDB:
-        new_amberfile = AmberFiles(topfile=top_file,crdfile=inpcrd_file,pdbfile=f"{amberfile.dir_pdb}/{amberfile.pdb_name}_amber.pdb",sus_file=amberfile.sus_mol)
+        new_amberfile = AmberFiles(topfile=top_file,crdfile=inpcrd_file,pdbfile=f"{amberfile.pdb_dir}/{amberfile.pdb_name}_amber.pdb",sus_file=amberfile.sus_mol)
     else:
         new_amberfile = AmberFiles(topfile=top_file,crdfile=inpcrd_file)
 
     if output:
         print(f"Saved files: \n   Amber topology:{top_file} \n   Coordinates: {inpcrd_file}")
         if savePDB:
-            print(f"   PDB: {amberfile.dir_pdb}/{amberfile.pdb_name}_amber.pdb")
+            print(f"   PDB: {amberfile.pdb_dir}/{amberfile.pdb_name}_amber.pdb")
 
     return new_amberfile
