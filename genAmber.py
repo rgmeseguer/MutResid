@@ -1,7 +1,7 @@
 import pytraj as pt
 from MutResid.checkFiles import check_pdb_file, check_param_files, AmberFiles
 
-def create_tleap_script(amberfile,addSolvent,savePDB,saveScript=False):
+def create_tleap_script(amberfile,addSolvent,savePDB,saveScript):
     """
     Generate a tleap script for creating Amber files from PDB and additional parameters.
 
@@ -50,7 +50,7 @@ def create_tleap_script(amberfile,addSolvent,savePDB,saveScript=False):
 
     return tleap_script
 
-def generate_amber_files(verbose=False,tleap_script=None,amberfile=None,addSolvent=False,savePDB=False,output=False):
+def generate_amber_files(verbose=False,tleap_script=None,amberfile=None,addSolvent=False,savePDB=False,output=False,saveScript=False):
     """
     Generate Amber files from input PDB and additional parameters.
 
@@ -69,7 +69,7 @@ def generate_amber_files(verbose=False,tleap_script=None,amberfile=None,addSolve
     """
     # If tleap script is not provided, create one
     if tleap_script==None:
-            tleap_script=create_tleap_script(amberfile,addSolvent,savePDB)
+            tleap_script=create_tleap_script(amberfile,addSolvent,savePDB,saveScript)
     
     # Load the tleap script using pytraj
     pt.load_leap(tleap_script,verbose=verbose )
