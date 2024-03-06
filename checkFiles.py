@@ -65,7 +65,7 @@ def check_param_files(mol_file):
         raise Exception(f"No {mol_file} found in {os.getcwd()}")
 
     with open(mol_path,"r") as mol:
-        resname = mol.readlines()[1]
+        resname = mol.readlines()[1].strip()
     # Return the absolute paths, base name, and directory path
     return mol_path, frcmod_path, param_dir, resname
 
