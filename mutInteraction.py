@@ -19,6 +19,17 @@ def extract_frame(traj,frame,output):
     pt.write_traj(output,traj,frame_indices=[frame],overwrite=True)
 
 def calc_mutated_ene_diff(Amberfile_Wild,Amberfile_Mut,mutated_resid):
+    """
+    Calculate the difference in electrostatic and van der Waals energy between wild type and mutated protein structures.
+
+    Parameters:
+        Amberfile_Wild (AmberFiles): AmberFiles object containing wild type protein information.
+        Amberfile_Mut (AmberFiles): AmberFiles object containing mutated protein information.
+        mutated_resid (str): Residue ID of the mutated residue.
+
+    Returns:
+        tuple: A tuple containing the electrostatic energy difference and van der Waals energy difference.
+    """
     traj_wild = pt.load(Amberfile_Wild.crd, Amberfile_Wild.parm)["!:WAT,Cl-"]
     traj_mut  = pt.load(Amberfile_Mut.crd,  Amberfile_Mut.parm )["!:WAT,Cl-"]
         
@@ -32,21 +43,20 @@ def calc_mutated_ene_diff(Amberfile_Wild,Amberfile_Mut,mutated_resid):
 
 def test_mutation(amberfile,residue_id,new_residue_name,verboseLeap=False,clean=False,skip=1):
     """
-    Tests residue mutation in a molecular dynamics trajectory.
+    Test mutation of a residue and calculate energy differences.
 
-    Args:
-        trajectory_file (str): Path to the trajectory file.
-        top_file (str): Path to the topology file.
+    Parameters:
+        amberfile (AmberFiles): AmberFiles object containing the amber files.
         residue_id (str): ID of the residue to mutate.
-        new_residue_name (str): Name of the new residue.
-        sus_file (str, optional): Path to additional parameters file (if needed). Defaults to None.
-        sus_name (str, optional): Name for the additional parameters (if needed). Defaults to None.
-        verboseLeap (bool, optional): Whether to enable verbose output during AMBER file generation. Defaults to False.
-        clean (bool, optional): Whether to clean up intermediate files. Defaults to False.
+        new_residue_name (str): Name of the new residue after mutation.
+        verboseLeap (bool, optional): Whether to print verbose output during Leap execution. Defaults to False.
+        clean (bool, optional): Whether to clean up temporary directories after calculation. Defaults to False.
+        skip (int, optional): Skip frames during trajectory analysis. Defaults to 1.
 
     Returns:
-        tuple: Tuple containing lists of electrostatic energy (E_elec) and van der Waals energy (E_vw).
+        tuple: A tuple containing lists of electrostatic and van der Waals energy differences.
     """
+    
     top_path = amberfile.parm
     traj_path = amberfile.crd
     wdir = amberfile.parm_dir
@@ -61,10 +71,8 @@ def test_mutation(amberfile,residue_id,new_residue_name,verboseLeap=False,clean=
     if not os.path.exists(f'{outDirWild}'): os.mkdir(f'{outDirWild}')
     if not os.path.exists(f'{outDirMut}'):  os.mkdir(f'{outDirMut}')
     
-    # Initialize energy lists
     elec_list = []
     vdw_list = []
-    # Process frames from the trajectory
     for idx, frame in enumerate(traj[::skip]):
         outfile_Wild = f"{outDirWild}/frame_{idx}.pdb"
         outfile_Mut = f"{outDirMut}/mutated_frame_{idx}.pdb"
@@ -79,7 +87,6 @@ def test_mutation(amberfile,residue_id,new_residue_name,verboseLeap=False,clean=
         elec_list.append( elec_energy )
         vdw_list.append( vdw_energy )
                       
-    # Clean up intermediate files if requested
     if clean:
         shutil.rmtree(outDirWild, ignore_errors=True)
         shutil.rmtree(outDirMut, ignore_errors=True)

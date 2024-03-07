@@ -70,15 +70,28 @@ def check_param_files(mol_file):
     return mol_path, frcmod_path, param_dir, resname
 
 def check_topncrd(top_file,traj_file):
+    """
+    Check the existence of topology and coordinates files.
+
+    Parameters:
+        top_file (str): Path to the topology file.
+        traj_file (str): Path to the coordinates file.
+
+    Returns:
+        tuple: A tuple containing paths to the topology file, topology directory,
+               coordinates file, and coordinates directory.
+    """
+    # Check if the topology file exists
     if os.path.exists(top_file):
-        top_path = os.path.abspath(top_file)
-        top_dir = os.path.dirname(os.path.abspath(top_file))
+        top_path = os.path.abspath(top_file)  # Absolute path to topology file
+        top_dir = os.path.dirname(top_path)   # Directory of topology file
     else:
         raise Exception(f"No {top_file} found in {os.getcwd()}")
-        
-    if os.path.exists(os.path.exists(traj_file)):
-        traj_path = os.path.abspath(traj_file)
-        traj_dir = os.path.dirname(os.path.abspath(traj_file))
+
+    # Check if the coordinates file exists
+    if os.path.exists(traj_file):
+        traj_path = os.path.abspath(traj_file)  # Absolute path to coordinates file
+        traj_dir = os.path.dirname(traj_path)   # Directory of coordinates file
     else:
         raise Exception(f"No {traj_file} found in {os.getcwd()}")
                       
@@ -86,21 +99,34 @@ def check_topncrd(top_file,traj_file):
 
 class AmberFiles():
     def __init__(self,topfile=None,crdfile=None,pdbfile=None,sus_file=None):
-        self.parm = None
-        self.crd  = None
-        self.pdb  = None
-        self.sus_mol = None
+        """
+        Initialize an AmberFiles object with optional file paths.
+
+        Parameters:
+            topfile (str, optional): Path to the topology file.
+            crdfile (str, optional): Path to the coordinates file.
+            pdbfile (str, optional): Path to the PDB file.
+            sus_file (str, optional): Path to the sustrate parameters file.
+        """
+        # Initialize attributes
+        self.parm = None  # topology file
+        self.crd = None   # coordinates file
+        self.pdb = None   # PDB file
+        self.sus_mol = None  # SUS file
         
+        # Check and set topology and coordinates files
         if topfile!=None or crdfile!=None:
             if crdfile == None: 
                 raise Exception("If Topology is defined you have to define the coordinates too.") 
             if topfile == None:
                 raise Exception("If amber coordinates are defined you have to define the topology too.") 
-            
+
             self.parm, self.parm_dir, self.crd, self.crd_dir = check_topncrd(topfile,crdfile)
             
+        # Check and set PDB file
         if pdbfile!=None:
             self.pdb, self.pdb_name, self.pdb_dir = check_pdb_file(pdbfile)
         
+        # Check and set sustrate file
         if sus_file!=None:
             self.sus_mol, self.sus_frcmod, self.sus_dir, self.sus_name = check_param_files(sus_file)

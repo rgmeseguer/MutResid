@@ -1,20 +1,19 @@
 import pytraj as pt
-from MutResid.checkFiles import check_pdb_file, check_param_files, AmberFiles
+from MutResid.checkFiles import AmberFiles
 
 def create_tleap_script(amberfile,addSolvent,savePDB,saveScript):
     """
-    Generate a tleap script for creating Amber files from PDB and additional parameters.
+    Create a tleap script based on input parameters.
 
     Parameters:
-        pdb (str): The path to the input PDB file.
-        extra_param (str): The path to additional parameters file.
-        extra_name (str): Name of the additional parameter.
-        addSolvent (bool): Flag to indicate if solvent needs to be added.
-        saveScript (bool): Flag to save the tleap script.
+        amberfile (AmberFiles): AmberFiles object containing file paths.
+        addSolvent (bool): Whether to solvate the system.
+        savePDB (bool): Whether to save the resulting PDB file.
+        saveScript (bool): Whether to save the tleap script.
 
     Returns:
-        tuple: Directory path, PDB name, and tleap script.
-    """
+        str: Generated tleap script.
+    """    
     tleap_header = f"source leaprc.protein.ff14SB\nsource leaprc.water.tip3p\n"
     tleap_solvent = ""
     tleap_xparam = ""
@@ -52,20 +51,19 @@ def create_tleap_script(amberfile,addSolvent,savePDB,saveScript):
 
 def generate_amber_files(verbose=False,tleap_script=None,amberfile=None,addSolvent=False,savePDB=False,output=False,saveScript=False):
     """
-    Generate Amber files from input PDB and additional parameters.
+    Generate AMBER files using tleap.
 
     Parameters:
-        verbose (bool): Flag to enable verbose output.
-        tleap_script (str): String of a tleap script. If defined the remaining parameters are ignored.
-        
-        if telap_script is not defined pdb is required and the rest of variables are optional.
-            pdb (str): Path to the input PDB file.
-            extra_param (str): Path to additional parameters file.
-            extra_name (str): Name of the additional parameter.
-            addSolvent (bool): Flag to indicate if solvent needs to be added.
-    
+        verbose (bool, optional): Whether to print verbose output during tleap execution.
+        tleap_script (str, optional): Tleap script to use. If None, create one.
+        amberfile (AmberFiles, optional): AmberFiles object containing file paths.
+        addSolvent (bool, optional): Whether to solvate the system.
+        savePDB (bool, optional): Whether to save the resulting PDB file.
+        output (bool, optional): Whether to print the paths of saved files.
+        saveScript (bool, optional): Whether to save the tleap script.
+
     Returns:
-        None
+        AmberFiles: An AmberFiles object containing paths to generated AMBER files.
     """
     # If tleap script is not provided, create one
     if tleap_script==None:
