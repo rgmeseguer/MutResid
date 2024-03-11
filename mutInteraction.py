@@ -33,8 +33,8 @@ def calc_mutated_ene_diff(Amberfile_Wild,Amberfile_Mut,mutated_resid):
     traj_wild = pt.load(Amberfile_Wild.crd, Amberfile_Wild.parm)["!:WAT,Cl-"]
     traj_mut  = pt.load(Amberfile_Mut.crd,  Amberfile_Mut.parm )["!:WAT,Cl-"]
         
-    data_wild = pt.lie(traj_wild,f':{mutated_resid}&(!@CA,C,O,N,H,HA)',options="nopbc")
-    data_mut  = pt.lie(traj_mut, f':{mutated_resid}&(!@CA,C,O,N,H,HA)',options="nopbc")        
+    data_wild = pt.lie(traj_wild,f':{mutated_resid}&(!@CA,C,O,N,H,HA)',options="cutvdw 5 cutelec 5")
+    data_mut  = pt.lie(traj_mut, f':{mutated_resid}&(!@CA,C,O,N,H,HA)',options="cutvdw 5 cutelec 5")        
     
     elec_energy = data_wild['LIE[EELEC]'][0] - data_mut['LIE[EELEC]'][0]
     vdw_energy  = data_wild['LIE[EVDW]'][0]  - data_mut['LIE[EVDW]'][0]
